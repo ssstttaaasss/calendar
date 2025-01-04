@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Мій календар</title>
+  <style>
+    /* Стилі темного фону */
+    body {
+      margin: 0;
+      padding: 0;
+      background: #1F1F1F;
+      font-family: -apple-system, BlinkMacSystemFont, 
+                   "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, 
+                   "Open Sans", "Helvetica Neue", sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    /* Контейнер у центрі */
+    .calendar-container {
+      background-color: #2C2C2C;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      max-width: 330px;
+      width: 90%;
+    }
+
+    /* Шапка календаря */
+    .calendar-header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .calendar-header h2 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+    .calendar-header p {
+      margin: 2px 0 0;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* Сітка для днів */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    /* Стилі для кожного дня */
+    .calendar-day {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 40px;
+      font-size: 0.95rem;
+      border-radius: 6px;
+      position: relative;
+      cursor: default;
+      user-select: none;
+    }
+
+    /* Мінімальна анімація при наведенні */
+    .calendar-day:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Перекреслений день (минулі дні) */
+    .past-day {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+
+    /* Сьогоднішній день з підсвіткою */
+    .today {
+      background-color: #007aff1a; /* темно-синій відтінок для "яблучного" вигляду */
+      border-radius: 50%;
+      font-weight: bold;
+      color: #FFFFFF;
+    }
+  </style>
+</head>
+<body>
+  <div class="calendar-container">
+    <div class="calendar-header">
+      <!-- Тут буде JS для назв місяця та року -->
+      <h2 id="monthAndYear"></h2>
+      <p id="currentDateInfo"></p>
+    </div>
+    <div class="calendar-grid" id="calendarGrid">
+      <!-- Сітка днів генеруватиметься JS -->
+    </div>
+  </div>
+
+  <script>
+    // Масив назв місяців (українською)
+    const monthNames = [
+      "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
+      "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
+    ];
+
+    // Отримуємо поточну дату
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+    const currentDay = today.getDate();
+
+    // Визначаємо кількість днів у місяці
+    // (передаємо 0 як день наступного місяця, що дасть останній день попереднього)
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+    // Визначаємо перший день тижня (індекс з 0 до 6)
+    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+
+    // Налаштовуємо відображення заголовка з поточним місяцем і роком
+    document.getElementById("monthAndYear").textContent = 
+      `${monthNames[currentMonth]} ${currentYear}`;
+
+    // Додаткова інформація: сьогоднішня повна дата
+    // (Наприклад: "Сьогодні: п'ятниця, 5 січня 2025")
+    const weekdays = ["Неділя","Понеділок","Вівторок","Середа","Четвер","П’ятниця","Субота"];
+    const currentWeekday = weekdays[today.getDay()];
+    document.getElementById("currentDateInfo").textContent = 
+      `Сьогодні: ${currentWeekday}, ${currentDay} ${monthNames[currentMonth]} ${currentYear}`;
+
+    // Отримуємо посилання на контейнер для днів
+    const calendarGrid = document.getElementById("calendarGrid");
+
+    // Додаємо "порожні" комірки на початку місяця (щоб вирівняти дні по правильному дня тижня)
+    // Зауважимо, що в JS дні тижня починаються з неділі (0) до суботи (6),
+    // якщо хочете почати з понеділка — можна змінити логіку.
+    // firstDayIndex = 0 (неділя), якщо перший день місяця — неділя
+    for (let i = 0; i < firstDayIndex; i++) {
+      const emptyCell = document.createElement("div");
+      emptyCell.classList.add("calendar-day");
+      calendarGrid.appendChild(emptyCell);
+    }
+
+    // Генеруємо дні місяця
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateEl = document.createElement("div");
+      dateEl.classList.add("calendar-day");
+      dateEl.textContent = day;
+
+      // Перевіряємо, чи це сьогоднішній день
+      if (day === currentDay) {
+        dateEl.classList.add("today");
+      }
+      // Перевіряємо, чи цей день вже минув (порівнюємо з поточним днем)
+      else if (day < currentDay) {
+        dateEl.classList.add("past-day");
+      }
+
+      calendarGrid.appendChild(dateEl);
+    }
+  </script>
+</body>
+</html>
