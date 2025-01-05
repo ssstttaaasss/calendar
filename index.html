@@ -4,86 +4,86 @@
   <meta charset="UTF-8" />
   <title>Minimal Apple-Style Calendar</title>
   <style>
-    /* БАЗОВИЙ CSS (темна тема, мінімальні відступи) */
+    /* 
+      1. БАЗОВІ СТИЛІ: ПРОЗОРИЙ ФОН, ПРИХОВАНА ПРОКРУТКА, МІНІМАЛІСТИЧНИЙ ШРИФТ 
+    */
     html, body {
-      margin: 0;
+      margin: 0; 
       padding: 0;
-      background-color: #1e1e1e; /* Темний фон */
+      background: transparent; /* ПРОЗОРИЙ ФОН */
       color: #f2f2f2;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
-                   "Helvetica Neue", Arial, sans-serif;
-      height: 100%;
-      width: 100%;
+      overflow: hidden; /* ПРИХОВАТИ СКРОЛ */
+      font-family: -apple-system, BlinkMacSystemFont, 
+                   "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       box-sizing: border-box;
     }
-
-    /* Головний контейнер */
-    .container {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 30px;
-      padding: 40px 20px;
-      max-width: 900px;
-      margin: 0 auto;
+    *, *::before, *::after {
+      box-sizing: inherit;
     }
 
-    /* Календар */
-    .calendar-container {
-      background: #2a2a2a;
-      border-radius: 16px;
+    /*
+      2. ГОЛОВНИЙ БЛОК-КАРТКА (widget-container)
+         - Задана ширина 300px (можна змінити)
+         - Тло темне (#2a2a2a) і легкі відступи
+         - Закруглені кути
+    */
+    .widget-container {
+      background: #2a2a2a; /* Прибрати або змінити, якщо хочете ще прозоріше */
+      width: 300px;
       padding: 20px;
-      min-width: 360px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      border-radius: 12px;
+      /* Невелика тінь (за бажання) */
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
 
-    .calendar-container h1 {
-      text-align: center;
+    /*
+      3. ЗАГОЛОВОК (НАЗВА МІСЯЦЯ ТА РОКУ)
+    */
+    h2 {
       margin: 0;
       padding: 0;
       font-weight: 600;
-      font-size: 1.6rem;
-      letter-spacing: 0.5px;
+      font-size: 1.4rem;
+      text-align: center;
       margin-bottom: 10px;
     }
 
-    /* Тонка лінія під заголовком */
+    /*
+      4. ТОНКА ЛІНІЯ (month-separator)
+    */
     .month-separator {
       border: none;
       border-bottom: 1px solid rgba(255,255,255,0.1);
-      margin: 0 0 15px;
+      margin: 0 0 12px;
     }
 
-    /* Таблиця календаря */
-    #calendarTable {
+    /*
+      5. ТАБЛИЦЯ КАЛЕНДАРЯ
+    */
+    table {
       width: 100%;
       border-collapse: collapse;
       text-align: center;
     }
-    #calendarTable thead th {
-      font-weight: 500;
-      color: #888;
-      padding-bottom: 6px;
+    th, td {
+      padding: 6px 0;
     }
-    #calendarTable tbody td {
-      height: 48px;
-      cursor: default;
-      position: relative;
-      user-select: none;
-      font-size: 0.95rem;
-      color: #f2f2f2;
-      transition: background-color 0.2s, color 0.2s;
+    th {
+      color: #888;
+      font-weight: 500;
     }
 
-    /* Минулі дні (сірий колір і закреслено) */
+    /*
+      6. МИНУЛІ ДНІ (PAST-DAY)
+    */
     .past-day {
       text-decoration: line-through;
       color: #555 !important;
-      cursor: not-allowed;
     }
 
-    /* Виділені дні (наприклад, контекстним кліком) */
+    /*
+      7. ПРИКЛАД КЛАСУ ДЛЯ ВИДІЛЕННЯ (Якщо робити "highlight" — за бажанням)
+    */
     .highlighted {
       position: relative;
       color: #fff !important;
@@ -91,8 +91,8 @@
     .highlighted::before {
       content: "";
       position: absolute;
-      width: 36px;
-      height: 36px;
+      width: 24px;
+      height: 24px;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -100,214 +100,83 @@
       border-radius: 50%;
       z-index: -1;
     }
-
-    /* Віджет справа */
-    .date-widget {
-      background: #2a2a2a;
-      width: 120px;
-      height: 120px;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 10px;
-      box-sizing: border-box;
-    }
-
-    .day-number {
-      font-size: 2.2rem;
-      font-weight: 700;
-      line-height: 1;
-    }
-    .month-name {
-      font-size: 1rem;
-      font-weight: 400;
-      text-transform: uppercase;
-    }
-
-    @media (max-width: 600px) {
-      .container {
-        flex-direction: column;
-        align-items: center;
-      }
-      .calendar-container {
-        width: 90%;
-        min-width: auto;
-      }
-      .date-widget {
-        margin-top: 20px;
-      }
-    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Календар -->
-    <div class="calendar-container">
-      <h1 id="calendarTitle"></h1>
-      <hr class="month-separator" />
-      
-      <table id="calendarTable">
-        <thead>
-          <tr>
-            <th>Пн</th>
-            <th>Вт</th>
-            <th>Ср</th>
-            <th>Чт</th>
-            <th>Пт</th>
-            <th>Сб</th>
-            <th>Нд</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+  <!-- Блок-картка віджета -->
+  <div class="widget-container">
+    <!-- Заголовок (місяць + рік) -->
+    <h2 id="calendarTitle"></h2>
+    <hr class="month-separator" />
 
-    <!-- Невеликий квадрат з датою (праворуч) -->
-    <div class="date-widget" id="dateWidget">
-      <div class="day-number" id="widgetDay">--</div>
-      <div class="month-name" id="widgetMonth">---</div>
-    </div>
+    <!-- Таблиця (Пн-Нд) -->
+    <table>
+      <thead>
+        <tr>
+          <th>Пн</th>
+          <th>Вт</th>
+          <th>Ср</th>
+          <th>Чт</th>
+          <th>Пт</th>
+          <th>Сб</th>
+          <th>Нд</th>
+        </tr>
+      </thead>
+      <tbody id="calendarBody"></tbody>
+    </table>
   </div>
 
   <script>
-    /**************************************************
-      1. ВИЗНАЧЕННЯ ПОТОЧНОГО МІСЯЦЯ ТА РОКУ
-    **************************************************/
+    /* 
+      ПРОСТИЙ СКРИПТ: ЗАВАНТАЖУЄ ПОТОЧНИЙ МІСЯЦЬ 
+      І ЗАПОВНЮЄ ТАБЛИЦЮ ДНЯМИ.
+    */
     const today = new Date();
     const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth(); // 0..11
+    const currentMonth = today.getMonth();
 
-    /**************************************************
-      2. ПІДГОТОВКА ЕЛЕМЕНТІВ
-    **************************************************/
-    const calendarTitle = document.getElementById('calendarTitle');
-    const calendarTableBody = document.querySelector('#calendarTable tbody');
+    // Визначимо назву місяця (українською)
+    const monthName = new Date(currentYear, currentMonth)
+      .toLocaleString("uk-UA", { month: "long", year: "numeric" });
+    // Пишемо в заголовок (перша літера велика, додаємо "р.")
+    const calendarTitleEl = document.getElementById("calendarTitle");
+    calendarTitleEl.textContent =
+      monthName.charAt(0).toUpperCase() + monthName.slice(1) + " р.";
 
-    const widgetDayEl = document.getElementById('widgetDay');
-    const widgetMonthEl = document.getElementById('widgetMonth');
+    const calendarBody = document.getElementById("calendarBody");
+    // Обчислюємо зсув: який день тижня у "1" числа?
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    // Робимо так, щоб Пн=0, ..., Нд=6
+    const offset = (firstDay + 6) % 7;
+    // Скільки днів у місяці?
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-    // Збереження/завантаження виділених днів з LocalStorage
-    let highlightedDays = JSON.parse(localStorage.getItem('highlightedDays_v5')) || {};
+    let dayCounter = 1;
+    // Робимо до 6 рядків (макс), щоб вмістити весь місяць
+    for (let row = 0; row < 6; row++) {
+      const tr = document.createElement("tr");
+      
+      for (let col = 0; col < 7; col++) {
+        const td = document.createElement("td");
+        
+        // Якщо ще не дійшли до першого дня, або вже перебрали дні місяця
+        if ((row === 0 && col < offset) || dayCounter > daysInMonth) {
+          td.textContent = "";
+        } else {
+          td.textContent = dayCounter;
 
-    /**************************************************
-      3. ФУНКЦІЯ ГЕНЕРАЦІЇ КАЛЕНДАРЯ
-    **************************************************/
-    function generateCalendar(year, month) {
-      // Очищаємо попередні ряди
-      calendarTableBody.innerHTML = '';
-
-      // Назва місяця та року (українською, з великої літери)
-      const monthName = new Date(year, month).toLocaleString('uk-UA', {
-        month: 'long',
-        year: 'numeric'
-      });
-      calendarTitle.textContent =
-        monthName.charAt(0).toUpperCase() + monthName.slice(1) + ' р.';
-
-      // Знайдемо день тижня для 1-го числа (JS: 0=неділя, 1=понеділок, ...)
-      const firstDay = new Date(year, month, 1).getDay();
-      // Зробимо так, що Пн=0, Вт=1... Нд=6
-      // (Для цього трохи «зсуваємо», якщо треба)
-      const offset = (firstDay + 6) % 7;
-
-      // Кількість днів у цьому місяці
-      const totalDays = new Date(year, month + 1, 0).getDate();
-
-      let currentDay = 1;
-      // Макс 6 рядків (тижнів) у місяці
-      for (let rowIndex = 0; rowIndex < 6; rowIndex++) {
-        const row = document.createElement('tr');
-
-        for (let colIndex = 0; colIndex < 7; colIndex++) {
-          const cell = document.createElement('td');
-
-          // Якщо ще не дійшли до початку місяця або вже «вийшли» за totalDays
-          if ((rowIndex === 0 && colIndex < offset) || currentDay > totalDays) {
-            cell.textContent = '';
-          } else {
-            cell.textContent = currentDay;
-
-            // Генеруємо ключ для LocalStorage
-            const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(currentDay).padStart(2,'0')}`;
-            cell.dataset.date = dateKey;
-
-            // Перевірити, чи цей день у минулому
-            const cellDate = new Date(year, month, currentDay);
-            const isPast = cellDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-            if (isPast) {
-              // Закреслення
-              cell.classList.add('past-day');
-            } else {
-              // Якщо день не в минулому: можна виділяти через контекстне меню
-              cell.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                toggleHighlight(cell);
-              });
-              // При кліку – оновлюємо віджет праворуч
-              cell.addEventListener('click', () => {
-                updateDateWidget(dateKey);
-              });
-            }
-
-            // Якщо день уже виділений
-            if (highlightedDays[dateKey]) {
-              cell.classList.add('highlighted');
-            }
-
-            currentDay++;
+          // Позначимо минулі дні
+          const cellDate = new Date(currentYear, currentMonth, dayCounter);
+          const isPast = cellDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          if (isPast) {
+            td.classList.add("past-day");
           }
-          row.appendChild(cell);
+
+          dayCounter++;
         }
-        calendarTableBody.appendChild(row);
+        tr.appendChild(td);
       }
-    }
-
-    /**************************************************
-      4. ПЕРЕМИКАННЯ ВИДІЛЕННЯ (highlight)
-    **************************************************/
-    function toggleHighlight(cell) {
-      const dateKey = cell.dataset.date;
-      if (!dateKey) return;
-
-      if (cell.classList.contains('highlighted')) {
-        cell.classList.remove('highlighted');
-        delete highlightedDays[dateKey];
-      } else {
-        cell.classList.add('highlighted');
-        highlightedDays[dateKey] = true;
-      }
-      localStorage.setItem('highlightedDays_v5', JSON.stringify(highlightedDays));
-    }
-
-    /**************************************************
-      5. ОНОВЛЕННЯ ВІДЖЕТУ ПРАВОРУЧ (ДЕНЬ/МІСЯЦЬ)
-    **************************************************/
-    function updateDateWidget(dateKey) {
-      if (!dateKey) return;
-      const [yyyy, mm, dd] = dateKey.split('-');
-      widgetDayEl.textContent = dd; // наприклад, '05'
-
-      // Скорочена назва місяця (uk-UA)
-      const shortMonth = new Date(parseInt(yyyy), parseInt(mm)-1, parseInt(dd))
-        .toLocaleString('uk-UA', { month: 'short' })
-        .replace('.', ''); // Іноді з'являється крапка
-      widgetMonthEl.textContent = shortMonth.toUpperCase(); // 'СІЧ'
-    }
-
-    /**************************************************
-      6. СТАРТ: генеруємо календар, ставимо сьогоднішню дату у віджет
-    **************************************************/
-    generateCalendar(currentYear, currentMonth);
-
-    // За замовчуванням показуємо сьогоднішню дату у віджеті
-    const todayKey = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-    const todayCell = document.querySelector(`td[data-date="${todayKey}"]`);
-    if (todayCell && !todayCell.classList.contains('past-day')) {
-      updateDateWidget(todayKey);
+      calendarBody.appendChild(tr);
     }
   </script>
 </body>
